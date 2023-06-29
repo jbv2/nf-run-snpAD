@@ -68,4 +68,6 @@ workflow {
 
     SNPAD(MAPABILITY.out)
 
+    CALL(SNPAD.out.priors, SNPAD.out.errors, MAPABILITY.out)
+
 }
