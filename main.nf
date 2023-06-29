@@ -66,9 +66,12 @@ workflow {
     ch_map_bed = Channel.from(params.map_bed)
 
     MAPABILITY(ch_input, ch_map_bed)
+    ch_snpad_input = MAPABILITY.out
 
-    SNPAD(MAPABILITY.out)
+    SNPAD(ch_snpad_input)
+    ch_snpad_params = SNPAD.out
 
-    CALL(SNPAD.out, MAPABILITY.out)
+    CALL(ch_snpad_params, MAPABILITY.out)
+    ch_split_vcfs = CALL.out
 
 }

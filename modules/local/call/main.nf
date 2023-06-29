@@ -24,5 +24,6 @@ process CALL {
     --error $errors \
     --priors $priors \
     ${prefix}_chr\${i}_mapped.snpAD > ${prefix}_chr\${i}.vcf
+    done
     """
 }
