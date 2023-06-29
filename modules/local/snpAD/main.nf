@@ -4,7 +4,6 @@ process SNPAD {
 
     input:
     tuple val(meta), path(input)
-    val(cpus)
 
     output:
     tuple val(meta), path("priors*"),   emit: priors
@@ -18,7 +17,7 @@ process SNPAD {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     snpAD \
-        --cpus $cpus \
+        --cpus 30 \
         --priors_out priors_${prefix}.txt \
         --errors_out errors_${prefix}.txt \
         ${prefix}_chr21_mapped.snpAD
