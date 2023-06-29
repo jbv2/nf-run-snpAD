@@ -60,4 +60,8 @@ workflow {
         ch_input = BAM2SNPAD_NOT_UDG(ch_bam, ch_bai, ch_ref_fasta)
     }
 
+    ch_map_bed = Channel.from(params.map_bed)
+
+    MAPABILITY(ch_input, ch_map_bed)
+
 }
