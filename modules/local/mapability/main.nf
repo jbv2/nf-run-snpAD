@@ -18,7 +18,9 @@ process MAPABILITY {
     """
     for i in `seq 1 22` X Y ;
     do
-    intersectbed.pl ${prefix}_chr\${i}".snpAD" ${map_bed}/\${i}.bed > ${prefix}_chr\${i}_mapped.snpAD ;
+    intersectbed.pl \
+        ${prefix}_chr\${i}".snpAD" \
+        ${map_bed}/\${i}.bed > ${prefix}_chr\${i}_mapped.snpAD ;
     done
     """
 }
