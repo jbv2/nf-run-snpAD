@@ -30,6 +30,7 @@ include { BAM2SNPAD_NOT_UDG } from './modules/local/bam2snpad/not_udg/main'
 include { BAM2SNPAD_UDG     } from './modules/local/bam2snpad/udg/main'
 include { MAPABILITY        } from './modules/local/mapability/main'
 include { SNPAD             } from './modules/local/snpAD/main'
+include { CALL              } from './modules/local/call/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
