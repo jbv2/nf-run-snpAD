@@ -4,7 +4,7 @@ process BAM2SNPAD_UDG {
 
     input:
     tuple val(meta), path(bam)
-    tuple val(meta), path(bai)
+    path(bai)
     path(ref_fasta)
 
     output:
