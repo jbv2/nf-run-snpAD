@@ -15,7 +15,8 @@ work*
 mkmodules/*/test/results/*
 
 test/results*
-test/data*
+test/data/test.bam
+test/data/test.bam.bai
 
 ## ignore local R datas
 *.Rdata

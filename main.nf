@@ -50,15 +50,8 @@ workflow {
             [ fmeta, bam ]
         }
 
-    ch_bai = Channel.fromFilePairs(params.bai, size: -1)
-        .map {
-            meta, bai ->
-            def fmeta = [:]
-            // Set meta.id
-            fmeta.id = meta
-            [ fmeta, bai ]
-        }
-    ch_ref_fasta = Channel.fromPath(params.fasta)
+    ch_bai = Channel.fromPath(params.bai)
+    ch_ref_fasta = Channel.from(params.fasta)
 
     if ( params.udg ) {
         ch_input = BAM2SNPAD_UDG(ch_bam, ch_bai, ch_ref_fasta)
