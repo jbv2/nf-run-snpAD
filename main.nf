@@ -52,7 +52,7 @@ workflow {
         }
 
     ch_bai = Channel.fromPath(params.bai)
-    ch_ref_fasta = Channel.from(params.fasta)
+    ch_ref_fasta = Channel.from(params.ref_fasta)
 
     if ( params.udg ) {
         ch_input = BAM2SNPAD_UDG(ch_bam, ch_bai, ch_ref_fasta)
