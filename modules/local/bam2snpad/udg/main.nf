@@ -19,7 +19,12 @@ process BAM2SNPAD_UDG {
     """
     for i in `seq 1 22` X Y ;
     do
-    Bam2snpAD $bam --bam_index $bai --region \${i} --map_qual 25 --fasta $ref_fasta > ${prefix}_chr\${i}".snpAD";
+    Bam2snpAD \
+        --bam_index $bai \
+        --region \${i} \
+        --map_qual 25 \
+        --fasta $ref_fasta \
+        $bam >${prefix}_chr\${i}".snpAD" ;
     done
     """
 }
