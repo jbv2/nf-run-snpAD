@@ -29,6 +29,7 @@ nextflow.enable.dsl = 2
 include { BAM2SNPAD_NOT_UDG } from './modules/local/bam2snpad/not_udg/main'
 include { BAM2SNPAD_UDG     } from './modules/local/bam2snpad/udg/main'
 include { MAPABILITY        } from './modules/local/mapability/main'
+include { SNPAD             } from './modules/local/snpAD/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,5 +65,7 @@ workflow {
     ch_map_bed = Channel.from(params.map_bed)
 
     MAPABILITY(ch_input, ch_map_bed)
+
+    SNPAD(MAPABILITY.out)
 
 }
