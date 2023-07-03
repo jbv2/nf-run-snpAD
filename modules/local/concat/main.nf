@@ -3,8 +3,8 @@ process CONCAT {
     label 'process_low'
 
     input:
-    tuple val(meta), path(vcf)
-    val(rsID)
+    val(meta)
+    path(vcfs)
 
     output:
     tuple val(meta), path("*.sorted.vcf.gz*"),   emit: sorted_vcf
@@ -17,7 +17,7 @@ process CONCAT {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     bcftools concat \\
-    \$(ls ${prefix}*.vcf | sort -V ) \\
+    $vcfs \\
      --threads 8 \\
      | bcftools filter \\
     -i 'FMT/GQ>20' \\
@@ -30,7 +30,7 @@ process CONCAT {
      --tbi ${prefix}.sorted_tmp.vcf.gz \\
      --threads 8 \\
  && bcftools annotate \\
-    --annotations $rsID \\
+    --annotations $args \\
     --columns ID \\
     --set-id +'%CHROM\\_%POS\\_%REF\\_%FIRST_ALT' \\
     --threads 8 \\

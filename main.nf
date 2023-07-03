@@ -57,8 +57,8 @@ workflow {
 
     ch_bai = Channel.fromPath(params.bai)
     ch_ref_fasta = Channel.from(params.ref_fasta)
-    //ch_i = Channel.of(1..22, 'X', 'Y')
-    ch_i = Channel.of(1..3)
+    ch_i = Channel.of(1..22, 'X', 'Y')
+    //ch_i = Channel.of(1..3)
 
     ch_input_bam2snpad = ch_bam
     .combine(ch_bai)
@@ -81,29 +81,45 @@ workflow {
 
     ch_map_bed = Channel.from(params.map_bed)
 
-    //ch_input_mappability =
-    ch_input
+    ch_input_mappability = ch_input
     .combine(ch_map_bed)
     .multiMap{
             meta, input, chrom, map ->
             input:    [ meta, input ]
             chrom:    [ chrom       ]
-            map:      [ map         ]
+            map_bed:  [ map         ]
         }
 
-    // ch_input_mappability.input.view()
+    ch_mapped_bams = MAPABILITY(ch_input_mappability.input, ch_input_mappability.chrom.flatten(), ch_input_mappability.map_bed)
 
-    // MAPABILITY(ch_input, ch_map_bed)
-    // ch_snpad_input = MAPABILITY.out
+    ch_snpad_input = ch_mapped_bams
+    .filter { entry ->
+    entry[2] == 21 //Here use chrom 21
+    }
+    .map { meta, input, chrom ->
+    [ meta, input ]
+    }
+    
+    ch_snpad_params =  SNPAD(ch_snpad_input)
 
-    // SNPAD(ch_snpad_input)
-    // ch_snpad_params = SNPAD.out
+    ch_ref_fasta_fai = Channel.from(params.ref_fasta_fai)
 
-    // ch_ref_fasta_fai = Channel.from(params.ref_fasta_fai)
-    // CALL(ch_snpad_params, MAPABILITY.out, ch_ref_fasta_fai)
-    // ch_split_vcfs = CALL.out
+    ch_call_input = SNPAD.out.priors
+    .merge(SNPAD.out.errors)
+    .combine(ch_mapped_bams)
+    .combine(ch_ref_fasta_fai)
+    .multiMap {
+        priors, errors, meta, input, chrom, fai ->
+        priors:   [ priors      ]
+        errors:   [ errors      ]
+        input:    [ meta, input ]
+        chrom:    [ chrom       ]
+        fai:      [ fai         ]
+            }
 
-    // ch_rsID = Channel.from(params.rsID)
-    // CONCAT(ch_split_vcfs, params.rsID)
+    ch_split_vcfs = CALL(ch_call_input.priors, ch_call_input.errors, ch_call_input.input, ch_call_input.chrom.flatten(), ch_call_input.fai.flatten())
+    .collect()
+
+    CONCAT(ch_input_bam2snpad.bam.first().map{[it[0]]}, ch_split_vcfs)
 
 }

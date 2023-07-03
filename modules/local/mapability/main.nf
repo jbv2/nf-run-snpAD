@@ -4,10 +4,11 @@ process MAPABILITY {
 
     input:
     tuple val(meta), path(input)
+    val(ch_i)
     path(map_bed)
 
     output:
-    tuple val(meta), path("*.snpAD"),   emit: inputs
+    tuple val(meta), path("*.snpAD"), val(ch_i),   emit: inputs
 
     when:
     task.ext.when == null || task.ext.when
@@ -16,11 +17,8 @@ process MAPABILITY {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    for i in `seq 1 22` X Y ;
-    do
     intersectbed.pl \
-        ${prefix}_chr\${i}".snpAD" \
-        ${map_bed}/\${i}.bed > ${prefix}_chr\${i}_mapped.snpAD ;
-    done
+        ${prefix}_chr$ch_i".snpAD" \
+        ${map_bed}/$ch_i".bed" > ${prefix}_chr$ch_i"_mapped.snpAD"
     """
 }
