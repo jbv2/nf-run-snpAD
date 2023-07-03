@@ -6,9 +6,10 @@ process BAM2SNPAD_UDG {
     tuple val(meta), path(bam)
     path(bai)
     path(ref_fasta)
+    val(ch_i)
 
     output:
-    tuple val(meta), path("*.snpAD"),   emit: inputs
+    tuple val(meta), path("*.snpAD"), val(ch_i),  emit: inputs
 
     when:
     task.ext.when == null || task.ext.when
@@ -17,14 +18,11 @@ process BAM2SNPAD_UDG {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    for i in `seq 1 22` X Y ;
-    do
     Bam2snpAD \
         --bam_index $bai \
-        --region \${i} \
+        --region $ch_i \
         --map_qual 25 \
         --fasta $ref_fasta \
-        $bam >${prefix}_chr\${i}".snpAD" ;
-    done
+        $bam >${prefix}_chr$ch_i".snpAD" 
     """
 }

@@ -1,5 +1,6 @@
 ## ignore swap files
 *.swp
+._*
 
 ## ignore Rplots.pdf trash files
 *Rplots.pdf
