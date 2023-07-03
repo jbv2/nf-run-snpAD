@@ -69,7 +69,7 @@ workflow {
     ch_snpad_input = MAPABILITY.out
 
     SNPAD(ch_snpad_input)
-    ch_snpad_params = SNPAD.out
+    ch_snpad_params = SNPAD.out.inputs
 
     CALL(ch_snpad_params, MAPABILITY.out)
     ch_split_vcfs = CALL.out
