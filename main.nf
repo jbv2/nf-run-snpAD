@@ -74,7 +74,7 @@ workflow {
     
     if ( params.udg ) {
         ch_input = BAM2SNPAD_UDG(ch_input_bam2snpad.bam, ch_input_bam2snpad.bai, ch_input_bam2snpad.fasta, ch_input_bam2snpad.chrom.flatten())
-    } else ( !params.udg ) {
+    } else {
         ch_input = BAM2SNPAD_NOT_UDG(ch_input_bam2snpad.bam, ch_input_bam2snpad.bai, ch_input_bam2snpad.fasta, ch_input_bam2snpad.chrom.flatten())
     }
 

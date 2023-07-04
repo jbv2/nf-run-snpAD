@@ -25,6 +25,7 @@ test/data/test.bam.bai
 
 ## ignore real data dirs
 real-data
+conf/real_data.config
 
 ## ignore modules marked as REDO - means, in need of refactoring or remaking
 *REDO
