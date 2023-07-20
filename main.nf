@@ -120,6 +120,6 @@ workflow {
     ch_split_vcfs = CALL(ch_call_input.priors, ch_call_input.errors, ch_call_input.input, ch_call_input.chrom.flatten(), ch_call_input.fai.flatten())
     .collect()
 
-    CONCAT(ch_input_bam2snpad.bam.first().map{[it[0]]}, ch_split_vcfs)
+    CONCAT(ch_input_bam2snpad.bam.first().map{it[0]}, ch_split_vcfs, ch_ref_fasta)
 
 }
