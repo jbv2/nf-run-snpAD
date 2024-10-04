@@ -1,0 +1,2 @@
+sample_id	inputbam	bai	udg
+test	/mnt/archgen/users/ballesteros/nf-run-snpAD/test/data/test.bam	/mnt/archgen/users/ballesteros/nf-run-snpAD/test/data//test/data/test.bam.bai	true

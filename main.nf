@@ -20,6 +20,7 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */ 
 
+params.input_tsv = null  // This will hold the TSV file path from the command line
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,16 +47,37 @@ include { CONCAT            } from './modules/local/concat/main'
 
 workflow {
 
-    ch_bam = Channel.fromFilePairs(params.inputbam, size: -1)
-        .map {
-            meta, bam ->
-            def fmeta = [:]
-            // Set meta.id
-            fmeta.id = meta
-            [ fmeta, bam ]
+    if (!params.input_tsv) {
+        error "Please provide a TSV file using the '--input_tsv' parameter."
+    }
+
+    // Read the TSV file and extract columns
+    ch_samples = Channel
+        .fromPath(params.input_tsv)
+        .splitCsv(header: true, sep: '\t')
+        .map { row -> 
+            def meta = [ id: row.sample_id ]
+            def bam  = row.inputbam
+            def bai  = row.bai
+            def udg  = row.udg
+            return [meta, bam, bai, udg]
         }
 
-    ch_bai = Channel.fromPath(params.bai)
+    // Separate UDG and non-UDG samples
+    ch_bam = ch_samples.map { meta, bam, bai, udg -> [meta, bam] }
+    ch_bai = ch_samples.map { meta, bam, bai, udg -> bai }
+    ch_udg = ch_samples.map { meta, bam, bai, udg -> udg }
+
+    // ch_bam = Channel.fromFilePairs(params.inputbam, size: -1)
+    //     .map {
+    //         meta, bam ->
+    //         def fmeta = [:]
+    //         // Set meta.id
+    //         fmeta.id = meta
+    //         [ fmeta, bam ]
+    //     }
+
+    // ch_bai = Channel.fromPath(params.bai)
     ch_ref_fasta = Channel.from(params.ref_fasta)
     ch_i = Channel.of(1..22, 'X', 'Y')
     //ch_i = Channel.of(1..3)
@@ -72,7 +94,8 @@ workflow {
             chrom:    [ chrom     ]
         }
     
-    if ( params.udg ) {
+     // Process samples based on UDG or non-UDG from the TSV
+    if ( ch_udg ) {
         ch_input = BAM2SNPAD_UDG(ch_input_bam2snpad.bam, ch_input_bam2snpad.bai, ch_input_bam2snpad.fasta, ch_input_bam2snpad.chrom.flatten())
     } else {
         ch_input = BAM2SNPAD_NOT_UDG(ch_input_bam2snpad.bam, ch_input_bam2snpad.bai, ch_input_bam2snpad.fasta, ch_input_bam2snpad.chrom.flatten())

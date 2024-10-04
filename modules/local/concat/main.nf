@@ -1,6 +1,6 @@
 process CONCAT {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_high_memory'
 
     input:
     val(meta)
@@ -17,6 +17,7 @@ process CONCAT {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
+    memory=\$(echo "$task.memory" | sed "s# GB#G#")
     bcftools concat \\
     $vcfs \\
      --threads 8 \\
@@ -25,6 +26,7 @@ process CONCAT {
     --set-GTs . \\
     --threads 8 \\
      | bcftools sort \\
+     --max-mem 100G \\
         -Oz \\
         -o ${prefix}.sorted_tmp.vcf.gz \\
  && bcftools index \\
