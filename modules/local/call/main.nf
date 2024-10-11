@@ -1,6 +1,7 @@
 process CALL {
     tag "$meta.id"
     label 'process_single'
+    scratch true
 
     input:
     path(priors)
@@ -10,7 +11,7 @@ process CALL {
     val(ref_fasta_fai)
 
     output:
-    path("*.vcf"),   emit: vcf
+    tuple val(meta), path("*.vcf"),   emit: vcf
 
     when:
     task.ext.when == null || task.ext.when

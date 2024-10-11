@@ -1,6 +1,7 @@
 process MAPABILITY {
     tag "$meta.id"
     label 'process_single'
+    scratch true
 
     input:
     tuple val(meta), path(input)

@@ -131,11 +131,11 @@ workflow {
     ch_ref_fasta_fai = Channel.from(params.ref_fasta_fai)
 
     ch_call_input = SNPAD.out.priors
-    .merge(SNPAD.out.errors)
-    .combine(ch_mapped_bams)
+    .combine(SNPAD.out.errors, by: 0)
+    .combine(ch_mapped_bams, by: 0) 
     .combine(ch_ref_fasta_fai)
     .multiMap {
-        priors, errors, meta, input, chrom, fai ->
+        meta, priors, errors, input, chrom, fai ->
         priors:   [ priors      ]
         errors:   [ errors      ]
         input:    [ meta, input ]
@@ -144,8 +144,13 @@ workflow {
             }
 
     ch_split_vcfs = CALL(ch_call_input.priors, ch_call_input.errors, ch_call_input.input, ch_call_input.chrom.flatten(), ch_call_input.fai.flatten())
-    .collect()
+    .groupTuple(size : 24)
+    .combine(ch_ref_fasta)
+    .multiMap{ meta, vcfs, fasta ->
+        vcf:   [meta, vcfs]
+        fasta: [fasta]
+        }
 
-    CONCAT(ch_input_mappability.input.first().map{it[0]}, ch_split_vcfs, ch_ref_fasta)
+    CONCAT(ch_split_vcfs)
 
 }

@@ -1,13 +1,14 @@
 process SNPAD {
     tag "$meta.id"
     label 'process_high'
+    scratch true
 
     input:
     tuple val(meta), path(input)
 
     output:
-    path("priors*"),   emit: priors
-    path("errors*"),   emit: errors
+    tuple val(meta), path("priors*"),   emit: priors
+    tuple val(meta), path("errors*"),   emit: errors
 
     when:
     task.ext.when == null || task.ext.when

@@ -1,6 +1,7 @@
 process BAM2SNPAD_UDG {
     tag "$meta.id"
     label 'process_single'
+    scratch true
 
     input:
     tuple val(meta), path(bam)

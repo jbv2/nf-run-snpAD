@@ -3,8 +3,7 @@ process CONCAT {
     label 'process_high_memory'
 
     input:
-    val(meta)
-    path(vcfs)
+    tuple val(meta), path(vcfs)
     path(fasta_ref)
 
     output:
@@ -20,28 +19,31 @@ process CONCAT {
     memory=\$(echo "$task.memory" | sed "s# GB#G#")
     bcftools concat \\
     $vcfs \\
-     --threads 8 \\
-     | bcftools filter \\
+    --threads ${task.cpus} \\
+    | bcftools filter \\
     -i 'FMT/GQ>30' \\
     --set-GTs . \\
-    --threads 8 \\
-     | bcftools sort \\
-     --max-mem 100G \\
+    --threads ${task.cpus} \\
+    |  bcftools view \\
+    --exclude-uncalled \\
+    --threads ${task.cpus} \\
+    | bcftools sort \\
+    --max-mem \${memory} \\
         -Oz \\
         -o ${prefix}.sorted_tmp.vcf.gz \\
  && bcftools index \\
      --tbi ${prefix}.sorted_tmp.vcf.gz \\
-     --threads 8 \\
+     --threads ${task.cpus} \\
  && bcftools annotate \\
     --annotations $args \\
     --columns ID \\
     --set-id +'%CHROM\\_%POS\\_%REF\\_%FIRST_ALT' \\
-    --threads 8 \\
+    --threads ${task.cpus} \\
     ${prefix}.sorted_tmp.vcf.gz \\
 | bcftools norm \\
 --check-ref s \\
         --fasta-ref $fasta_ref \\
-        --threads 64 \\
+        --threads ${task.cpus} \\
     -Oz -o ${prefix}.sorted.vcf.gz \\
  && bcftools index \\
     --tbi ${prefix}.sorted.vcf.gz \\
