@@ -32,7 +32,12 @@ include { BAM2SNPAD_UDG     } from './modules/local/bam2snpad/udg/main'
 include { MAPABILITY        } from './modules/local/mapability/main'
 include { SNPAD             } from './modules/local/snpAD/main'
 include { CALL              } from './modules/local/call/main'
-include { CONCAT            } from './modules/local/concat/main'
+include { BCFTOOLS_CONCAT   } from './modules/local/bcftools/concat/main'
+include { BCFTOOLS_FILTER   } from './modules/local/bcftools/filter/main'
+include { BCFTOOLS_SORT     } from './modules/local/bcftools/sort/main'
+include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_SORTED    } from './modules/local/bcftools/index/main'
+include { BCFTOOLS_ANNOTATE     } from './modules/local/bcftools/annotate/main'
+include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_ANNOTATED    } from './modules/local/bcftools/index/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -145,12 +150,26 @@ workflow {
 
     ch_split_vcfs = CALL(ch_call_input.priors, ch_call_input.errors, ch_call_input.input, ch_call_input.chrom.flatten(), ch_call_input.fai.flatten())
     .groupTuple(size : 24)
+    // .combine(ch_ref_fasta)
+    .multiMap{ meta, vcfs ->
+        vcf:   [meta, vcfs]
+        }
+
+    ch_concatenated = BCFTOOLS_CONCAT(ch_split_vcfs)
     .combine(ch_ref_fasta)
     .multiMap{ meta, vcfs, fasta ->
         vcf:   [meta, vcfs]
         fasta: [fasta]
         }
 
-    CONCAT(ch_split_vcfs)
+    ch_filtered = BCFTOOLS_FILTER(ch_concatenated)
+
+    ch_sorted = BCFTOOLS_SORT(ch_filtered)
+
+    ch_index_sorted = BCFTOOLS_INDEX_SORTED(ch_sorted)
+
+    ch_annotate = BCFTOOLS_ANNOTATE(ch_sorted, ch_index_sorted)
+
+    BCFTOOLS_INDEX_ANNOTATED(ch_annotate)
 
 }
