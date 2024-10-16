@@ -6,7 +6,7 @@ process BCFTOOLS_INDEX {
     tuple val(meta), path(vcf)
 
     output:
-    tuple val(meta), path("*.tbi"), emit: index_file
+    tuple val(meta), path("${meta.id}*.tbi"), emit: index_file
 
     script:
     """

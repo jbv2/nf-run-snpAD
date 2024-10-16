@@ -164,11 +164,18 @@ workflow {
 
     ch_filtered = BCFTOOLS_FILTER(ch_concatenated)
 
-    ch_sorted = BCFTOOLS_SORT(ch_filtered)
+    ch_sorted = BCFTOOLS_SORT(ch_filtered) 
 
     ch_index_sorted = BCFTOOLS_INDEX_SORTED(ch_sorted)
+    
+    ch_input_annotate = ch_sorted
+    .combine(ch_index_sorted, by: 0)
+    .multiMap{ meta, vcf, tbi ->
+    vcfs: [meta, vcf]
+    tbi:  [tbi]
+    }
 
-    ch_annotate = BCFTOOLS_ANNOTATE(ch_sorted, ch_index_sorted)
+    ch_annotate = BCFTOOLS_ANNOTATE(ch_input_annotate)
 
     BCFTOOLS_INDEX_ANNOTATED(ch_annotate)
 

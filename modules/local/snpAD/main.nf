@@ -1,7 +1,7 @@
 process SNPAD {
     tag "$meta.id"
     label 'process_high'
-    scratch true
+    scratch false
 
     input:
     tuple val(meta), path(input)

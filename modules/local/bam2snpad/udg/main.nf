@@ -22,8 +22,9 @@ process BAM2SNPAD_UDG {
     Bam2snpAD \
         --bam_index $bai \
         --region $ch_i \
-        --map_qual 25 \
+        --map_qual 30 \
         --fasta $ref_fasta \
+        --offset 31 \
         $bam >${prefix}_chr$ch_i".snpAD" 
     """
 }

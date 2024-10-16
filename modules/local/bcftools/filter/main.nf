@@ -7,14 +7,14 @@ process BCFTOOLS_FILTER {
     path(fasta_ref)
 
     output:
-    tuple val(meta), path("*.filtered.vcf.gz"), emit: filtered_vcf
+    tuple val(meta), path("${meta.id}.filtered.vcf.gz"), emit: filtered_vcf
 
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     bcftools filter \\
-        -i 'FMT/GQ>30' \\
+        -i 'FMT/DP > 3 && FMT/GQ > 29' \\
         --set-GTs . \\
         --threads ${task.cpus} \\
         ${vcf} \\

@@ -6,7 +6,7 @@ process BCFTOOLS_SORT {
     tuple val(meta), path(vcf)
 
     output:
-    tuple val(meta), path("*.sorted.vcf.gz"), emit: sorted_vcf
+    tuple val(meta), path("${meta.id}.sorted.vcf.gz"), emit: sorted_vcf
 
     script:
     def memory = task.memory.toMega()  // Use memory in megabytes

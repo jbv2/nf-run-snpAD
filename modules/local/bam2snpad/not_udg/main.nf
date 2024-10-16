@@ -22,7 +22,7 @@ process BAM2SNPAD_NOT_UDG {
     Bam2snpAD \
         --region $ch_i \
         --bam_index $bai  \
-        --map_qual 25 \
+        --map_qual 30 \
         --fasta $ref_fasta \
         $bam >${prefix}_chr$ch_i".snpAD" 
     """

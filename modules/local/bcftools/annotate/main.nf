@@ -4,7 +4,7 @@ process BCFTOOLS_ANNOTATE {
 
     input:
     tuple val(meta), path(vcf)
-    tuple val(meta), path(tbi)
+    path(tbi)
 
     output:
     tuple val(meta), path("${meta.id}.annotated.vcf.gz"), emit: annotated_vcf
