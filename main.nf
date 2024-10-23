@@ -39,6 +39,7 @@ include { BCFTOOLS_SORT     } from './modules/local/bcftools/sort/main'
 include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_SORTED    } from './modules/local/bcftools/index/main'
 include { BCFTOOLS_ANNOTATE     } from './modules/local/bcftools/annotate/main'
 include { BCFTOOLS_INDEX as BCFTOOLS_INDEX_ANNOTATED    } from './modules/local/bcftools/index/main'
+include { BCFTOOLS_STATS   } from './modules/local/bcftools/stats/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -196,8 +197,13 @@ workflow {
 
     ch_annotate = BCFTOOLS_ANNOTATE(ch_input_annotate)
 
-    BCFTOOLS_INDEX_ANNOTATED(ch_annotate)
+    ch_annotate_index = BCFTOOLS_INDEX_ANNOTATED(ch_annotate)
 
+    ch_stats_input = ch_annotate
+    .combine(ch_annotate_index, by: 0)
+
+    BCFTOOLS_STATS(ch_stats_input)
+    
     } else {
     // Continue without accesibility 
     ch_snpad_input = ch_mapped_inputs
@@ -254,7 +260,12 @@ workflow {
 
     ch_annotate = BCFTOOLS_ANNOTATE(ch_input_annotate)
 
-    BCFTOOLS_INDEX_ANNOTATED(ch_annotate)
+    ch_annotate_index = BCFTOOLS_INDEX_ANNOTATED(ch_annotate)
+
+    ch_stats_input = ch_annotate
+    .combine(ch_annotate_index, by: 0)
+
+    BCFTOOLS_STATS(ch_stats_input)
 
     }
 
