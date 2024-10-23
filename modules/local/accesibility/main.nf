@@ -1,4 +1,4 @@
-process MAPABILITY {
+process ACCESIBILITY {
     tag "$meta.id"
     label 'process_single'
     scratch true
@@ -6,10 +6,10 @@ process MAPABILITY {
     input:
     tuple val(meta), path(input)
     val(ch_i)
-    path(map_bed)
+    path(accesibility_bed)
 
     output:
-    tuple val(meta), path("*_mapped.snpAD"), val(ch_i),   emit: inputs
+    tuple val(meta), path("*_mapped_strict1kgp.snpAD"), val(ch_i),   emit: strict_inputs
 
     when:
     task.ext.when == null || task.ext.when
@@ -19,7 +19,7 @@ process MAPABILITY {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     intersectbed.pl \
-        ${prefix}_chr$ch_i".snpAD" \
-        ${map_bed}/$ch_i".bed" > ${prefix}_chr$ch_i"_mapped.snpAD"
+        ${prefix}_chr$ch_i"_mapped.snpAD" \
+        ${accesibility_bed}/$ch_i".bed" > ${prefix}_chr$ch_i"_mapped_strict1kgp.snpAD"
     """
 }

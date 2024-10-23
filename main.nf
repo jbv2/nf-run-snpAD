@@ -30,6 +30,7 @@ params.input_tsv = null  // This will hold the TSV file path from the command li
 include { BAM2SNPAD_NOT_UDG } from './modules/local/bam2snpad/not_udg/main'
 include { BAM2SNPAD_UDG     } from './modules/local/bam2snpad/udg/main'
 include { MAPABILITY        } from './modules/local/mapability/main'
+include { ACCESIBILITY      } from './modules/local/accesibility/main'
 include { SNPAD             } from './modules/local/snpAD/main'
 include { CALL              } from './modules/local/call/main'
 include { BCFTOOLS_CONCAT   } from './modules/local/bcftools/concat/main'
@@ -121,9 +122,27 @@ workflow {
             map_bed:  [ map         ]
         }
 
-    ch_mapped_bams = MAPABILITY(ch_input_mappability.input, ch_input_mappability.chrom.flatten(), ch_input_mappability.map_bed)
+    ch_mapped_inputs = MAPABILITY(ch_input_mappability.input, ch_input_mappability.chrom.flatten(), ch_input_mappability.map_bed)
 
-    ch_snpad_input = ch_mapped_bams
+    // Add accesibility masked regions 1KGP
+
+    if ( params.accesibility ) {
+    //Run Accesibility
+    ch_accesibility_bed = Channel.from(params.accesibility_bed)
+
+    ch_input_accesibility = ch_mapped_inputs
+    .combine(ch_accesibility_bed)
+    .multiMap{
+            meta, input, chrom, acces_bed ->
+            input:     [ meta, input  ]
+            chrom:     [ chrom        ]
+            acces_bed: [ acces_bed    ]
+        }
+
+    ch_accesibility_inputs = ACCESIBILITY(ch_input_accesibility.input, ch_input_accesibility.chrom.flatten(), ch_input_accesibility.acces_bed)
+
+    // Continue with the same further steps
+    ch_snpad_input = ch_accesibility_inputs
     .filter { entry ->
     entry[2] == 21 //Here use chrom 21
     }
@@ -137,7 +156,7 @@ workflow {
 
     ch_call_input = SNPAD.out.priors
     .combine(SNPAD.out.errors, by: 0)
-    .combine(ch_mapped_bams, by: 0) 
+    .combine(ch_accesibility_inputs, by: 0) 
     .combine(ch_ref_fasta_fai)
     .multiMap {
         meta, priors, errors, input, chrom, fai ->
@@ -178,5 +197,65 @@ workflow {
     ch_annotate = BCFTOOLS_ANNOTATE(ch_input_annotate)
 
     BCFTOOLS_INDEX_ANNOTATED(ch_annotate)
+
+    } else {
+    // Continue without accesibility 
+    ch_snpad_input = ch_mapped_inputs
+    .filter { entry ->
+    entry[2] == 21 //Here use chrom 21
+    }
+    .map { meta, input, chrom ->
+    [ meta, input ]
+    }
+    
+    ch_snpad_params =  SNPAD(ch_snpad_input)
+
+    ch_ref_fasta_fai = Channel.from(params.ref_fasta_fai)
+
+    ch_call_input = SNPAD.out.priors
+    .combine(SNPAD.out.errors, by: 0)
+    .combine(ch_mapped_inputs, by: 0) 
+    .combine(ch_ref_fasta_fai)
+    .multiMap {
+        meta, priors, errors, input, chrom, fai ->
+        priors:   [ priors      ]
+        errors:   [ errors      ]
+        input:    [ meta, input ]
+        chrom:    [ chrom       ]
+        fai:      [ fai         ]
+            }
+
+    ch_split_vcfs = CALL(ch_call_input.priors, ch_call_input.errors, ch_call_input.input, ch_call_input.chrom.flatten(), ch_call_input.fai.flatten())
+    .groupTuple(size : 24)
+    // .combine(ch_ref_fasta)
+    .multiMap{ meta, vcfs ->
+        vcf:   [meta, vcfs]
+        }
+
+    ch_concatenated = BCFTOOLS_CONCAT(ch_split_vcfs)
+    .combine(ch_ref_fasta)
+    .multiMap{ meta, vcfs, fasta ->
+        vcf:   [meta, vcfs]
+        fasta: [fasta]
+        }
+
+    ch_filtered = BCFTOOLS_FILTER(ch_concatenated)
+
+    ch_sorted = BCFTOOLS_SORT(ch_filtered) 
+
+    ch_index_sorted = BCFTOOLS_INDEX_SORTED(ch_sorted)
+    
+    ch_input_annotate = ch_sorted
+    .combine(ch_index_sorted, by: 0)
+    .multiMap{ meta, vcf, tbi ->
+    vcfs: [meta, vcf]
+    tbi:  [tbi]
+    }
+
+    ch_annotate = BCFTOOLS_ANNOTATE(ch_input_annotate)
+
+    BCFTOOLS_INDEX_ANNOTATED(ch_annotate)
+
+    }
 
 }
