@@ -112,7 +112,7 @@ workflow {
     ch_input = ch_input.mix(ch_input_udg)
     }
 
-    ch_map_bed = Channel.from(params.map_bed)
+    ch_map_bed = Channel.from(params.map_bed) 
 
     ch_input_mappability = ch_input
     .combine(ch_map_bed)
@@ -139,7 +139,7 @@ workflow {
             chrom:     [ chrom        ]
             acces_bed: [ acces_bed    ]
         }
-
+    
     ch_accesibility_inputs = ACCESIBILITY(ch_input_accesibility.input, ch_input_accesibility.chrom.flatten(), ch_input_accesibility.acces_bed)
 
     // Continue with the same further steps
