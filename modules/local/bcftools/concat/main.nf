@@ -1,6 +1,7 @@
 process BCFTOOLS_CONCAT {
     tag "$meta.id"
     label 'process_medium'
+    scratch true
 
     input:
     tuple val(meta), path(vcfs)

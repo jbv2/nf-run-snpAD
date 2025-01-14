@@ -1,7 +1,7 @@
 process ACCESIBILITY {
     tag "$meta.id"
     label 'process_single'
-    scratch false
+    scratch true
 
     input:
     tuple val(meta), path(input)

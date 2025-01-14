@@ -1,6 +1,7 @@
 process BCFTOOLS_INDEX {
     tag "$meta.id"
     label 'process_single'
+    scratch true
 
     input:
     tuple val(meta), path(vcf)

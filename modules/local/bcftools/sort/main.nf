@@ -1,6 +1,7 @@
 process BCFTOOLS_SORT {
     tag "$meta.id"
     label 'process_high_memory'
+    scratch true
 
     input:
     tuple val(meta), path(vcf)
@@ -15,6 +16,7 @@ process BCFTOOLS_SORT {
     """
     bcftools sort \\
         --max-mem ${memory}M \\
+        --temp-dir . \\
         -Oz -o ${prefix}.sorted.vcf.gz \\
         ${vcf}
     """

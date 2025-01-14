@@ -1,6 +1,7 @@
 process BCFTOOLS_ANNOTATE {
     tag "$meta.id"
     label 'process_low'
+    scratch true
 
     input:
     tuple val(meta), path(vcf)

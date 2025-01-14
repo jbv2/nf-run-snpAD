@@ -17,10 +17,14 @@ process SNPAD {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
+    # awk -F'\t' 'NF >= 7' $input > $input"_min4dp"
+
+    awk -F'\t' 'NF >= 13' $input > $input"_min4dp"
+
     snpAD \
         --cpus 30 \
         --priors_out priors_${prefix}.txt \
         --errors_out errors_${prefix}.txt \
-        $input
+        $input"_min4dp"
     """
 }

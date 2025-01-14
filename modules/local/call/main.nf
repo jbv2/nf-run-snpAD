@@ -21,12 +21,13 @@ process CALL {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def accesibility = task.ext.acc ?: "${params.accesibility}"
     """
-    # Conditionally set poplistname based on f4mode
+    # Conditionally set poplistname based on accesibility
     if [ '$accesibility' == 'true' ]; then
     snpADCall \
     --name ${prefix} \
     --error $errors \
     --priors $priors \
+    --set_zero_priors 0.0000000003125 \
     ${prefix}_chr$ch_i"_mapped_strict1kgp.snpAD" > ${prefix}_chr$ch_i".vcf" \
     && bcftools reheader \
      --fai $ref_fasta_fai \
@@ -39,6 +40,7 @@ process CALL {
     --name ${prefix} \
     --error $errors \
     --priors $priors \
+    --set_zero_priors 0.0000000003125 \
     ${prefix}_chr$ch_i"_mapped.snpAD" > ${prefix}_chr$ch_i".vcf" \
     && bcftools reheader \
      --fai $ref_fasta_fai \
